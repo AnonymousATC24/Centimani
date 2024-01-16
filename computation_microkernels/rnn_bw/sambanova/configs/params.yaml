@@ -1,0 +1,176 @@
+# Copyright 2022 Cerebras Systems.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+dense: #matrix vector product
+    input:
+        batch_size: 512
+        use_generator: False
+        dataset_name: "synth"
+        feature_shape:
+            - 128  # size of vector
+        num_classes: 16
+
+    model:
+        model_name: "DenseModel"
+        hidden_size: 2048 # size of Ax
+        depth: 8 #Number of dense layer applied
+
+        enable_bias: False
+        nonlinearity: "relu"
+
+        mixed_precision: True
+        boundary_casting: False
+        tf_summary: False
+
+    optimizer:
+        optimizer_type: "adam"
+        learning_rate: 0.001
+        beta1: 0.9
+        beta2: 0.999
+        epsilon: 1.0e-8
+
+    runconfig:
+        max_steps: 500000
+        model_dir: 'model_dir'
+        log_step_count_steps: 10000
+        save_summary_steps: 10000
+        save_checkpoints_steps: 0 #It doesn't save checkpoints
+        keep_checkpoint_max: 0 #It doesn't keep checkpoints
+        cs_ip:
+        mode: 'train'
+
+gemm:
+    input:
+        batch_size: 512
+        use_generator: False
+        dataset_name: "synth"
+        feature_shape:
+            - 256 #number of rows first matrix
+            - 128 #number of cols first matrix = number of rows second matrix
+        label_shape:
+            - 256 #Same as number of rows first matrix
+        num_classes: 16
+
+    model:
+        model_name: "DenseModel"
+        hidden_size: 2048
+        depth: 8 #number of gemms done in a row
+
+        enable_bias: False
+        nonlinearity: "relu"
+
+        mixed_precision: True
+        boundary_casting: False
+        tf_summary: False
+
+    optimizer:
+        optimizer_type: "adam"
+        learning_rate: 0.001
+        beta1: 0.9
+        beta2: 0.999
+        epsilon: 1.0e-8
+
+    runconfig:
+        max_steps: 500000
+        model_dir: 'model_dir'
+        log_step_count_steps: 10000
+        save_summary_steps: 10000
+        save_checkpoints_steps: 0 #It doesn't save checkpoints
+        keep_checkpoint_max: 0 #It doesn't keep checkpoints
+        cs_ip:
+        mode: 'train'
+cnn:
+    input:
+        batch_size: 512
+        use_generator: False
+        dataset_name: "synth"
+        feature_shape: #Image settings
+            - 32 #number of channels
+            - 128 #dim_x
+            - 128 #dim_y
+        label_shape:
+            - 16384 #Flatten labels of size dim_x * dim_y
+        num_classes: 2
+
+    model:
+        model_name: "CNNModel"
+        filter_size: 32 #number of channels after applying CNN 
+        output_model: 2 
+        depth: 1 #Number of CNNs in a row applied
+        kernel_size: 3 #Kernel = kernel_size x kernel_size
+
+        enable_bias: False
+        nonlinearity: "relu"
+
+        mixed_precision: True
+        boundary_casting: False
+        tf_summary: False
+
+    optimizer:
+        optimizer_type: "adam"
+        learning_rate: 0.001
+        beta1: 0.9
+        beta2: 0.999
+        epsilon: 1.0e-8
+
+    runconfig:
+        max_steps: 500000
+        model_dir: 'model_dir'
+        log_step_count_steps: 10000
+        save_summary_steps: 10000
+        save_checkpoints_steps: 0 #It doesn't save checkpoints
+        keep_checkpoint_max: 0 #It doesn't keep checkpoints
+        cs_ip:
+        mode: 'train'
+rnn:
+    input:
+        batch_size: 512
+        use_generator: False
+        dataset_name: "synth"
+        feature_shape:
+            - 128 #Time steps
+            - 256 #Input dimension
+        label_shape:
+            - 128 #Same as time steps
+        num_classes: 256 
+
+    model:
+        model_name: "RNNModel"
+        hidden_size: 256 #Output dimension LSTM 
+        depth: 3
+        rnn_cell: 'lstm'
+
+        rnn_use_bias: False
+        rnn_activation: 'tanh'
+        rnn_recurrent_activation: 'sigmoid'
+        rnn_unit_forget_bias: False
+
+        mixed_precision: True
+        boundary_casting: False
+        tf_summary: False
+
+    optimizer:
+        optimizer_type: "adam"
+        learning_rate: 0.001
+        max_gradient_norm: 5.0
+        loss_scaling_factor: 1.0
+
+    runconfig:
+        max_steps: 500000
+        model_dir: 'model_dir'
+        log_step_count_steps: 10000
+        save_summary_steps: 10000
+        save_checkpoints_steps: 0 #It doesn't save checkpoints
+        keep_checkpoint_max: 0 #It doesn't keep checkpoints
+        cs_ip:
+        mode: 'train'

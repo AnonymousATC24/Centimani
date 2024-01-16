@@ -1,0 +1,42 @@
+rnn:
+    input:
+        batch_size: 16
+        use_generator: False
+        dataset_name: "synth"
+        feature_shape:
+            - 25 #Time steps
+            - 512 #Input dimension
+        label_shape:
+            - 25 #Same as time steps
+        num_classes: 256 
+
+    model:
+        model_name: "RNNModel"
+        hidden_size: 512 #Output dimension LSTM 
+        depth: 3
+        rnn_cell: 'lstm'
+
+        rnn_use_bias: False
+        rnn_activation: 'tanh'
+        rnn_recurrent_activation: 'sigmoid'
+        rnn_unit_forget_bias: False
+
+        mixed_precision: True
+        boundary_casting: False
+        tf_summary: False
+
+    optimizer:
+        optimizer_type: "adam"
+        learning_rate: 0.001
+        max_gradient_norm: 5.0
+        loss_scaling_factor: 1.0
+
+    runconfig:
+        max_steps: 500000
+        model_dir: 'model_dir'
+        log_step_count_steps: 10000
+        save_summary_steps: 10000
+        save_checkpoints_steps: 0 #It doesn't save checkpoints
+        keep_checkpoint_max: 0 #It doesn't keep checkpoints
+        cs_ip:
+        mode: 'train'
